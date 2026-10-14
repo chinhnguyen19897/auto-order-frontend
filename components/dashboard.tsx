@@ -1,46 +1,46 @@
 "use client";
-import {useEffect, useState, useCallback, type FormEvent} from 'react';
+import {useEffect, useState, useCallback, SyntheticEvent} from 'react';
 import {
   Radio,
   Package,
   ShoppingBag,
   Send,
-  LogOut,
   ArrowUpRight,
   Plus,
   Check,
   Copy,
   RefreshCw,
   AlertCircle,
-  Settings,
   CircleDollarSign,
   MessageSquare
 } from 'lucide-react';
 import {api, ApiError, money, type DashboardData, type Product, type Comment} from './api';
+import {navigation, Sidebar} from "./Sidebar/Sidebar";
+import {ModalCommon} from "./Modal/ModalCommon";
+import {Tab} from "../types/tabs";
+import { Badge } from "./Badge/Badge";
 
-type Tab = 'live' | 'orders' | 'products' | 'notifications' | 'settings';
-const navigation = [{id: 'live', label: 'Live workspace', icon: Radio}, {
-  id: 'orders',
-  label: 'Orders',
-  icon: ShoppingBag
-},
-  {id: 'products', label: 'Products', icon: Package}, {
-    id: 'notifications',
-    label: 'Notifications',
-    icon: Send
-  }, {id: 'settings', label: 'Integrations', icon: Settings}] as const;
 
-function Badge({value}: { value: string }) {
-  return <span className={`badge ${value.toLowerCase()}`}>{value.replaceAll('_', ' ')}</span>;
-}
 
 export default function Dashboard() {
-  const [data, setData] = useState<DashboardData | null>(null), [signedIn, setSignedIn] = useState<boolean | null>(null);
-  const [tab, setTab] = useState<Tab>('live'), [error, setError] = useState(''), [notice, setNotice] = useState(''), [busy, setBusy] = useState(false);
-  const [email, setEmail] = useState('admin@example.com'), [password, setPassword] = useState('');
-  const [selectedSession, setSelectedSession] = useState(''), [query, setQuery] = useState(''), [filter, setFilter] = useState('ALL');
-  const [editing, setEditing] = useState<Product | 'new' | null>(null), [newSession, setNewSession] = useState(false), [reviewing, setReviewing] = useState<Comment | null>(null);
-  const [commentText, setCommentText] = useState('A12 - 230k - 0901234567'), [buyerHandle, setBuyerHandle] = useState('buyer_one'), [buyerId, setBuyerId] = useState('10001');
+  const [data, setData] = useState<DashboardData | null>(null)
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const [tab, setTab] = useState<Tab | string>('live')
+  const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
+  const [busy, setBusy] = useState(false);
+  const [email, setEmail] = useState('admin@example.com')
+  const [password, setPassword] = useState('');
+  const [selectedSession, setSelectedSession] = useState('')
+  const [query, setQuery] = useState('')
+  const [filter, setFilter] = useState('ALL');
+  const [editing, setEditing] = useState<Product | 'new' | null>(null)
+  const [newSession, setNewSession] = useState(false)
+  const [reviewing, setReviewing] = useState<Comment | null>(null);
+  const [commentText, setCommentText] = useState('A12 - 230k - 0901234567')
+  const [buyerHandle, setBuyerHandle] = useState('buyer_one')
+  const [buyerId, setBuyerId] = useState('10001');
+
   const refresh = useCallback(async () => {
     try {
       const result = await api<DashboardData>('admin/dashboard');
@@ -53,11 +53,13 @@ export default function Dashboard() {
       } else setError(e instanceof Error ? e.message : 'Unable to load dashboard.');
     }
   }, []);
+
   useEffect(() => {
     void refresh();
     const timer = setInterval(() => void refresh(), 5000);
     return () => clearInterval(timer);
   }, [refresh]);
+
   const mutate = async (action: () => Promise<unknown>, success: string) => {
     setBusy(true);
     setError('');
@@ -74,17 +76,18 @@ export default function Dashboard() {
       setBusy(false);
     }
   };
+
   const activeSession = data?.sessions.find(s => s.id === selectedSession) ?? data?.sessions.find(s => s.status === 'ACTIVE');
   const comments = data?.comments.filter(c => !activeSession || c.sessionId === activeSession.id) ?? [];
   const orders = data?.orders.filter(o => (filter === 'ALL' || o.status === filter) && `${o.code} ${o.handle} ${o.phone} ${o.product.name}`.toLowerCase().includes(query.toLowerCase())) ?? [];
 
-  async function login(e: FormEvent) {
+  async function login(e: SyntheticEvent) {
     e.preventDefault();
     await mutate(() => api('auth/login', {email, password}), 'Signed in.');
     setPassword('');
   }
 
-  async function simulate(e: FormEvent) {
+  async function simulate(e: SyntheticEvent) {
     e.preventDefault();
     if (!activeSession) return;
     await mutate(() => api('admin/comments/demo', {
@@ -102,45 +105,84 @@ export default function Dashboard() {
     }
   }
 
-  if (signedIn === null) return <main className="loading">Connecting to Auto Order…{error &&
+  const submitEditProduct = async (e: any, editing?: Product | 'new') => {
+    e.preventDefault();
+      if(!editing) return;
+      const f = new FormData(e.currentTarget);
+      const body = {
+        sku: String(f.get('sku')).toUpperCase(),
+        name: f.get('name'),
+        price: Number(f.get('price')),
+        deposit: Number(f.get('deposit')),
+        stock: Number(f.get('stock')),
+        active: f.get('active') === 'on', ...(editing === 'new' ? {} : {expectedVersion: editing?.version})
+      };
+      const checkEdit = await mutate(() => api(editing === 'new' ? 'admin/products' : `admin/products/${editing?.id}`, body, editing === 'new' ? 'POST' : 'PATCH'), 'Product saved.')
+
+      if (checkEdit) setEditing(null);
+  }
+
+  const createNewSession = async (e: any) => {
+    e.preventDefault();
+    const f = new FormData(e.currentTarget);
+    if (await mutate(() => api('admin/sessions', {
+            title: f.get('title'),
+            username: String(f.get('username')).replace(/^@/, ''),
+            currentProductId: f.get('productId') || null
+    }), 'Session created.')) setNewSession(false);
+  }
+
+  const createReviewing = async (e: any, reviewing: Comment | null) => {
+    e.preventDefault();
+    const f = new FormData(e.currentTarget);
+    const checkReview = await mutate(() => api(`admin/comments/${reviewing?.id}/resolve`, {
+      productId: f.get('productId'),
+      phone: f.get('phone')}), 'Comment resolved. Check the order or review status.')
+
+    if (checkReview) setReviewing(null);
+  }
+
+  if (signedIn === null) return <main className="loading">Connecting to Auto Order…{ error &&
       <p className="error">{error}</p>}</main>;
+
   if (!signedIn) return <main className="login">
     <div className="login-intro">
-      <div className="brand"><span className="brand-mark"><Radio size={22}/></span> Auto Order</div>
-      <span className="eyebrow">LESS ADMIN. MORE SELLING.</span><h1>Your live.<br/>Your orders.<br/><em>All
-      together.</em></h1><p>A focused workspace that turns live comments into orders and keeps every payment in
+      <div className="brand">
+        <span className="brand-mark">
+          <Radio size={22}/>
+        </span> Auto Order
+      </div>
+      <span className="eyebrow">LESS ADMIN. MORE SELLING.</span>
+      <h1>Your live.<br/>Your orders.<br/><em>All
+      together.</em>
+      </h1>
+      <p>A focused workspace that turns live comments into orders and keeps every payment in
       view.</p>
-      <div className="login-pill"><span className="dot"/> Built for live commerce</div>
+      <div className="login-pill">
+        <span className="dot"/> Built for live commerce
+      </div>
     </div>
-    <form className="login-card" onSubmit={login}><span className="eyebrow">SELLER WORKSPACE</span><h2>Welcome back</h2>
+    <form className="login-card" onSubmit={login}>
+      <span className="eyebrow">SELLER WORKSPACE</span>
+      <h2>Welcome back</h2>
       <p className="muted">Sign in to manage your next drop.</p>
       <label>Email<input type="email" autoComplete="username" required value={email}
                          onChange={e => setEmail(e.target.value)}/></label>
       <label>Password<input type="password" autoComplete="current-password" required value={password}
                             onChange={e => setPassword(e.target.value)}/></label>
       {error && <p className="error" role="alert">{error}</p>}
-      <button disabled={busy} className="primary">{busy ? 'Signing in…' : 'Sign in'} <ArrowUpRight size={17}/></button>
-      <p className="small muted">First run? Use the credentials generated in <code>backend/.env</code>.</p></form>
+      <button disabled={busy} className="primary">
+        {busy ? 'Signing in…' : 'Sign in'} <ArrowUpRight size={17}/>
+      </button>
+      <p className="small muted">First run? Use the credentials generated in <code>backend/.env</code>.</p>
+    </form>
   </main>;
+
   if (!data) return <main className="loading">Loading orders…</main>;
+
+
   return <div className="app-shell">
-    <aside className="sidebar">
-      <div className="brand"><span className="brand-mark"><Radio size={20}/></span>Auto Order</div>
-      <p className="nav-label">WORKSPACE</p>
-      <nav>{navigation.map(n => <button key={n.id} className={tab === n.id ? 'nav-item active' : 'nav-item'}
-                                        onClick={() => setTab(n.id)}>
-        <n.icon size={18}/>
-        {n.label}{n.id === 'orders' && <span className="nav-count">{data.metrics.orders}</span>}</button>)}</nav>
-      <div className="sidebar-bottom">
-        <div className="connection-card"><span
-          className="dot"/><strong>{data.config.demo ? 'Demo workspace' : 'Live workspace'}</strong>
-          <p>{data.config.demo ? 'Try the flow before connecting providers.' : 'Check stream health while selling.'}</p>
-        </div>
-        <button className="nav-item" onClick={() => void mutate(() => api('auth/logout', {}), 'Signed out.')}><LogOut
-          size={18}/>Sign out
-        </button>
-      </div>
-    </aside>
+    <Sidebar data={data} logout={mutate} tab={tab} setTab={setTab} />
     <div className="main-area">
       <header className="topbar"><span>Workspace <span
         className="muted"> / </span> {navigation.find(n => n.id === tab)?.label}</span>
@@ -184,7 +226,8 @@ export default function Dashboard() {
                 <div>
                     <div className="row gap"><span
                         className="dot"/><strong>{activeSession?.title || 'No active session'}</strong>{activeSession &&
-                        <Badge value={activeSession.connectionStatus}/>}</div>
+                        <Badge value={activeSession.connectionStatus}/>}
+                    </div>
                     <p className="muted small">{activeSession ? `@${activeSession.username} · One item per order · 15-minute stock reservation` : 'Create a session to start capturing orders.'}</p>
                   {activeSession?.lastError && <p className="error small">{activeSession.lastError}</p>}
                   {activeSession?.heartbeatAt && Date.now() - new Date(activeSession.heartbeatAt).getTime() > 20000 &&
@@ -211,10 +254,14 @@ export default function Dashboard() {
                           })}</time>
                         </div>
                         <span className="small muted">@{c.handle}</span><p>{c.text}</p>
-                        <div className="row spread"><Badge
-                          value={c.status}/>{['REVIEW', 'DUPLICATE'].includes(c.status) &&
-                            <button className="text-button" onClick={() => setReviewing(c)}>Review <ArrowUpRight
-                                size={14}/></button>}</div>
+                        <div className="row spread">
+                          <Badge
+                          value={c.status}/>
+                          {['REVIEW', 'DUPLICATE'].includes(c.status) &&
+                            <button className="text-button" onClick={() => setReviewing(c)}>Review <ArrowUpRight size={14}/>
+                            </button>
+                          }
+                        </div>
                         {c.reason && <p className="small muted">{c.reason}</p>}</div>
                     </article>)}</div>
                 </section>
@@ -350,9 +397,12 @@ export default function Dashboard() {
             <section className="panel">
                 <div className="panel-header"><h2>Integration status</h2></div>
                 <div className="panel-body integration-grid">
-                    <article><Radio/><h3>TikTok LIVE</h3><Badge value={data.config.demo ? 'DEMO' : 'LIVE'}/><p
-                        className="muted">Persistent worker receives comments using the unofficial TikTok connector.
-                        Monitor connection health for every session.</p></article>
+                    <article><Radio/><h3>TikTok LIVE</h3><Badge value={data.config.demo ? 'DEMO' : 'LIVE'}/>
+                        <p className="muted">
+                        Persistent worker receives comments using the unofficial TikTok connector.
+                        Monitor connection health for every session.
+                        </p>
+                    </article>
                     <article><CircleDollarSign/><h3>Banking QR</h3><Badge value={data.config.paymentProvider}/><p
                         className="muted">Configure payOS credentials on the backend. Payment is confirmed by a verified
                         webhook.</p></article>
@@ -388,88 +438,72 @@ export default function Dashboard() {
           </section>}</>}
       </main>
     </div>
-    {editing && <Modal title={editing === 'new' ? 'Add product' : 'Edit product'} onClose={() => setEditing(null)}>
-        <form onSubmit={async e => {
-          e.preventDefault();
-          const f = new FormData(e.currentTarget);
-          const body = {
-            sku: String(f.get('sku')).toUpperCase(),
-            name: f.get('name'),
-            price: Number(f.get('price')),
-            deposit: Number(f.get('deposit')),
-            stock: Number(f.get('stock')),
-            active: f.get('active') === 'on', ...(editing === 'new' ? {} : {expectedVersion: editing.version})
-          };
-          if (await mutate(() => api(editing === 'new' ? 'admin/products' : `admin/products/${editing.id}`, body, editing === 'new' ? 'POST' : 'PATCH'), 'Product saved.')) setEditing(null);
-        }}><label>Product code<input name="sku" required pattern="[A-Za-z]{1,8}[0-9]{1,8}"
+    {editing && <ModalCommon title={editing === 'new' ? 'Add product' : 'Edit product'} onClose={() => setEditing(null)}>
+        <form onSubmit={(e) => submitEditProduct(e, editing)}>
+            <label>Product code<input name="sku" required pattern="[A-Za-z]{1,8}[0-9]{1,8}"
                                      defaultValue={editing === 'new' ? '' : editing.sku}
-                                     placeholder="A12"/></label><label>Name<input name="name" required minLength={2}
-                                                                                  defaultValue={editing === 'new' ? '' : editing.name}/></label>
-            <div className="form-grid"><label>Price (VND)<input name="price" type="number" required min={1000}
-                                                                defaultValue={editing === 'new' ? 230000 : editing.price}/></label><label>Deposit
-                (VND)<input name="deposit" type="number" required min={1000}
-                            defaultValue={editing === 'new' ? 50000 : editing.deposit}/></label></div>
+                                     placeholder="A12"/>
+            </label>
+            <label>Name<input name="name" required minLength={2}
+                              defaultValue={editing === 'new' ? '' : editing.name}/>
+            </label>
+            <div className="form-grid">
+                <label>Price (VND)<input name="price" type="number" required min={1000}
+                                                                defaultValue={editing === 'new' ? 230000 : editing.price}/>
+                </label>
+                <label>Deposit (VND)<input name="deposit" type="number" required min={1000}
+                            defaultValue={editing === 'new' ? 50000 : editing.deposit}/>
+                </label>
+            </div>
             <label>Available stock<input name="stock" type="number" required min={0}
-                                         defaultValue={editing === 'new' ? 1 : editing.stock}/></label><label
-                className="checkbox"><input name="active" type="checkbox"
+                                         defaultValue={editing === 'new' ? 1 : editing.stock}/>
+            </label>
+            <label className="checkbox"><input name="active" type="checkbox"
                                             defaultChecked={editing === 'new' || editing.active}/>Available for
-                sale</label><p className="small muted">Stock means currently available units, excluding reserved/sold
-                units.</p>
+                sale
+            </label>
+            <p className="small muted">Stock means currently available units, excluding reserved/sold units.</p>
             <button className="primary full" disabled={busy}>Save product</button>
         </form>
-    </Modal>}
-    {newSession && <Modal title="Create live session" onClose={() => setNewSession(false)}>
-        <form onSubmit={async e => {
-          e.preventDefault();
-          const f = new FormData(e.currentTarget);
-          if (await mutate(() => api('admin/sessions', {
-            title: f.get('title'),
-            username: String(f.get('username')).replace(/^@/, ''),
-            currentProductId: f.get('productId') || null
-          }), 'Session created.')) setNewSession(false);
-        }}><label>Session title<input name="title" required minLength={2}
-                                      placeholder="Evening vintage drop"/></label><label>TikTok creator username<input
-            name="username" required placeholder="your_shop"/></label><label>Current product<select name="productId">
+    </ModalCommon>
+    }
+    {newSession && <ModalCommon title="Create live session" onClose={() => setNewSession(false)}>
+        <form onSubmit={createNewSession}>
+            <label>Session title<input name="title" required minLength={2} placeholder="Evening vintage drop"/>
+            </label>
+            <label>TikTok creator username<input name="username" required placeholder="your_shop"/>
+            </label>
+            <label>Current product<select name="productId">
             <option value="">Require code / unique price</option>
           {data.products.filter(p => p.active).map(p => <option key={p.id} value={p.id}>{p.sku} · {p.name}</option>)}
-        </select></label>
+        </select>
+            </label>
             <button disabled={busy} className="primary full">Create session</button>
         </form>
-    </Modal>}
+    </ModalCommon>}
     {reviewing &&
-        <Modal title="Review comment" onClose={() => setReviewing(null)}><p className="quote">{reviewing.text}</p><p
-            className="muted small">{reviewing.reason}</p>
-            <form onSubmit={async e => {
-              e.preventDefault();
-              const f = new FormData(e.currentTarget);
-              if (await mutate(() => api(`admin/comments/${reviewing.id}/resolve`, {
-                productId: f.get('productId'),
-                phone: f.get('phone')
-              }), 'Comment resolved. Check the order or review status.')) setReviewing(null);
-            }}><label>Confirmed product<select name="productId" required>
-                <option value="">Choose product</option>
-              {data.products.filter(p => p.active).map(p => <option key={p.id}
-                                                                    value={p.id}>{p.sku} · {p.name} · {money(p.price)}</option>)}
-            </select></label><label>Confirmed buyer phone<input name="phone" required placeholder="0901234567"/></label>
+        <ModalCommon title="Review comment" onClose={() => setReviewing(null)}>
+            <p className="quote">{reviewing.text}</p>
+            <p className="muted small">{reviewing.reason}</p>
+            <form onSubmit={(e) => createReviewing(e, reviewing)}>
+                <label>Confirmed product
+                    <select name="productId" required>
+                    <option value="">Choose product</option>
+                    {data.products.filter(p => p.active).map(p => <option key={p.id} value={p.id}>{p.sku} · {p.name} · {money(p.price)}</option>)}
+                  </select>
+                </label>
+                <label>Confirmed buyer phone<input name="phone" required placeholder="0901234567"/>
+                </label>
                 <p className="small muted">Confirm buyer intent before creating an additional order from a duplicate
                     comment.</p>
                 <button disabled={busy} className="primary full">Create confirmed draft</button>
                 <button type="button" disabled={busy} className="secondary full"
-                        onClick={() => void mutate(() => api(`admin/comments/${reviewing.id}/ignore`, {}), 'Comment dismissed.').then(ok => ok && setReviewing(null))}>Dismiss
-                    comment
+                        onClick={() => void mutate(() => api(`admin/comments/${reviewing.id}/ignore`, {}), 'Comment dismissed.').then(ok => ok && setReviewing(null))}>
+                    Dismiss comment
                 </button>
             </form>
-        </Modal>}
+        </ModalCommon>}
   </div>;
 }
 
-function Modal({title, onClose, children}: { title: string; onClose: () => void; children: React.ReactNode }) {
-  return <div className="modal-backdrop" onClick={onClose}>
-    <section className="modal" role="dialog" aria-modal="true" aria-label={title} onClick={e => e.stopPropagation()}>
-      <div className="panel-header"><h2>{title}</h2>
-        <button onClick={onClose} aria-label="Close dialog" className="icon-button">×</button>
-      </div>
-      <div className="panel-body">{children}</div>
-    </section>
-  </div>;
-}
+
