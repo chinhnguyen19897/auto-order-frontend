@@ -1,7 +1,7 @@
 import React from 'react';
 import {CircleDollarSign, Radio, Send} from "lucide-react";
 import {Badge} from "../Badge/Badge";
-import {money} from "../api";
+import {money} from "../../utils/currency";
 
 type SettingsProps = {
   data?: any

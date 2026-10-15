@@ -1,7 +1,8 @@
 import {LogOut, Package, Radio, Send, Settings, ShoppingBag} from "lucide-react";
-import {api, DashboardData} from "../api";
+import {api} from "../../lib/api";
 import {Tab} from "../../types/tabs";
 import {Dispatch, SetStateAction} from "react";
+import {DashboardData} from "../../types/common";
 
 type SidebarProps = {
   tab: string

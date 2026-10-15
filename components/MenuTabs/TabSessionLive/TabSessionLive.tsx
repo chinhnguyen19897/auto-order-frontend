@@ -1,7 +1,8 @@
 import React from 'react';
 import {Badge} from "../../Badge/Badge";
 import {ArrowUpRight, MessageSquare, Package, Send} from "lucide-react";
-import {api, money} from "../../api";
+import {api} from "../../../lib/api";
+import {money} from "../../../utils/currency";
 
 type TabSessionLiveProps = {
   activeSession: any

@@ -1,7 +1,7 @@
 import React from 'react';
 import {Package} from "lucide-react";
-import {money} from "../api";
 import {Badge} from "../Badge/Badge";
+import {money} from "../../utils/currency";
 
 type ProductsProps = {
   data?: any,

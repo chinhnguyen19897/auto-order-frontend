@@ -1,7 +1,9 @@
 "use client";
 import {useState, useEffect, useCallback, type FormEvent} from 'react';
 import {Check, Radio, LockKeyhole, Package, ArrowRight, CircleDollarSign} from 'lucide-react';
-import {api, money, type CheckoutData} from './api';
+import {api} from '../../lib/api';
+import {money} from "../../utils/currency";
+import {CheckoutData} from "../../types/common";
 
 export default function Checkout({token}: { token: string }) {
   const [order, setOrder] = useState<CheckoutData | null>(null), [error, setError] = useState(''), [busy, setBusy] = useState(false);

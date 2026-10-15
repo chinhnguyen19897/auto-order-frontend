@@ -11,4 +11,4 @@ Checked against the original repositories on 12 October 2026. The app ships orig
 
 All four repositories declare MIT for their open-source UI code. Retain each repository's license/copyright notices when copying. TailAdmin has a paid edition with additional screens; the free source is a smaller subset. Optional services such as auth/billing providers may have separate costs. A free UI does not supply TikTok, Zalo or bank integration logic.
 
-For this project, keep `components/api.ts` and the checkout API contracts. Replace `dashboard.tsx`, its shell and styles with the chosen template, and connect tables/forms to the real endpoints. Avoid importing the template's fake data or unrelated billing/auth flow as if it were this app's backend.
+For this project, keep `components/api.ts` and the checkout API contracts. Replace `Dashboard.tsx`, its shell and styles with the chosen template, and connect tables/forms to the real endpoints. Avoid importing the template's fake data or unrelated billing/auth flow as if it were this app's backend.

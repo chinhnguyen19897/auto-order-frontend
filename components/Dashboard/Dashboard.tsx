@@ -9,17 +9,19 @@ import {
   CircleDollarSign,
   MessageSquare
 } from 'lucide-react';
-import {api, ApiError, money, type DashboardData, type Product, type Comment} from './api';
-import {navigation, Sidebar} from "./Sidebar/Sidebar";
-import {ModalCommon} from "./Modal/ModalCommon";
-import {Tab} from "../types/tabs";
-import Login from "./login";
-import Loading from "./loading";
-import TabOrders from "./MenuTabs/TabOrders/TabOrders";
-import TabSessionLive from "./MenuTabs/TabSessionLive/TabSessionLive";
-import Products from "./Products/Products";
-import Notifications from "./Notifications/Notifications";
-import Settings from "./Settings/Settings";
+import {api, ApiError} from '../../lib/api';
+import {navigation, Sidebar} from "../Sidebar/Sidebar";
+import {ModalCommon} from "../Modal/ModalCommon";
+import {Tab} from "../../types/tabs";
+import Login from "../Login/login";
+import Loading from "../Loading/Loading";
+import TabOrders from "../MenuTabs/TabOrders/TabOrders";
+import TabSessionLive from "../MenuTabs/TabSessionLive/TabSessionLive";
+import Products from "../Products/Products";
+import Notifications from "../Notifications/Notifications";
+import Settings from "../Settings/Settings";
+import {money} from "../../utils/currency";
+import {DashboardData, Product, Comment} from "../../types/common";
 
 
 export default function Dashboard() {
