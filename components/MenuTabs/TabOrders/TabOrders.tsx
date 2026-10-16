@@ -1,8 +1,9 @@
 import React, {Dispatch, SetStateAction} from 'react';
-import {api, Order} from "../../../lib/api";
+import {api} from "../../../lib/api";
 import {Badge} from "../../Badge/Badge";
 import {ArrowUpRight, Copy, ShoppingBag} from "lucide-react";
 import {money} from "../../../utils/currency";
+import {Order} from "../../../types/common";
 
 type TabOrdersProps = {
   query: string,

@@ -10,18 +10,28 @@
     "setup": "node scripts/setup.mjs"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.9.1",
+    "@tanstack/react-query": "^5.104.3",
+    "@tanstack/react-table": "^9.3.1",
+    "lucide-react": "^0.468.0",
     "next": "16.4.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "lucide-react": "^0.468.0"
+    "react-hook-form": "^7.90.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@types/node": "^22.12.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
-    "typescript": "^5.9.3",
-    "@types/node": "^22.12.0"
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=22.12.0"
+  },
+  "intent": {
+    "skills": [
+      "*"
+    ]
   }
 }
