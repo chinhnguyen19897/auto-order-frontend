@@ -1274,3 +1274,19 @@ td strong {
         font-size: 10px
     }
 }
+.order-check-tabs { display: flex; gap: 10px; flex-wrap: wrap; padding: 16px 20px; border-bottom: 1px solid #e5e9ef; }
+.order-check-tabs button { border: 0; background: transparent; color: #738095; padding: 8px; }
+.order-check-tabs button.active { color: #087f72; background: #ecf7f4; border-radius: 6px; }
+.order-check-tabs span { margin-left: 6px; }
+.order-check-editor { padding: 20px; background: #f6faf9; display: grid; gap: 14px; border-bottom: 1px solid #dfe8e5; }
+.order-check-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.order-check-editor label { display: grid; gap: 6px; }
+.order-check-editor .order-issue-option { display: flex; align-items: center; gap: 6px; }
+.order-issue-option input { width: auto; }
+.order-check-editor fieldset { border: 1px solid #dfe8e5; border-radius: 6px; padding: 12px; }
+.order-check-editor textarea { min-height: 70px; width: 100%; }
+.order-check-editor > button { justify-self: start; }
+.badge.needs_matching { background: #fff4d8; color: #956200; }
+.badge.zalo_matched, .badge.confirmed { background: #eaf6f1; color: #087f72; }
+.badge.ready { background: #edf3ff; color: #2563eb; }
+.badge.issues { background: #fff0f0; color: #d83b46; }

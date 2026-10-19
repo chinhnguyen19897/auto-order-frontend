@@ -16,6 +16,7 @@ import {Tab} from "../../types/tabs";
 import Login from "../Login/login";
 import Loading from "../Loading/Loading";
 import TabOrders from "../MenuTabs/TabOrders/TabOrders";
+import {matchesOrderFilter} from '../../lib/order-checks';
 import TabSessionLive from "../MenuTabs/TabSessionLive/TabSessionLive";
 import Products from "../Products/Products";
 import Notifications from "../Notifications/Notifications";
@@ -81,7 +82,7 @@ export default function Dashboard() {
 
   const activeSession = data?.sessions.find(s => s.id === selectedSession) ?? data?.sessions.find(s => s.status === 'ACTIVE');
   const comments = data?.comments.filter(c => !activeSession || c.sessionId === activeSession.id) ?? [];
-  const orders = data?.orders.filter(o => (filter === 'ALL' || o.status === filter) && `${o.code} ${o.handle} ${o.phone} ${o.product.name}`.toLowerCase().includes(query.toLowerCase())) ?? [];
+  const orders = data?.orders.filter(o => matchesOrderFilter(o, filter) && `${o.code} ${o.handle} ${o.displayName} ${o.customerName ?? ''} ${o.phone} ${o.zaloContact ?? ''} ${o.product.name}`.toLowerCase().includes(query.toLowerCase())) ?? [];
 
   const orderStats = [
     {
@@ -227,7 +228,7 @@ export default function Dashboard() {
                                            mutate={mutate} setSelectedSession={setSelectedSession}
                                            setReviewing={setReviewing}/>}
         {tab === 'orders' &&
-            <TabOrders query={query} setQuery={setQuery} filter={filter} setFilter={setFilter} orders={orders}
+            <TabOrders query={query} setQuery={setQuery} filter={filter} setFilter={setFilter} orders={orders} allOrders={data.orders}
                        busy={busy} mutate={mutate} copyLink={copyLink}/>}
 
         {tab === 'products' && <Products data={data} editProduct={setEditing}/>}

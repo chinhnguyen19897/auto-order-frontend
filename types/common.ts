@@ -19,6 +19,12 @@ export type Session = {
   lastError: string | null
 };
 export type Order = {
+  workflowStatus: string;
+  zaloContact: string | null;
+  issues: string[];
+  issueNote: string | null;
+  checkStatus: string;
+  checkIssues: string[];
   id: string;
   code: string;
   handle: string;
