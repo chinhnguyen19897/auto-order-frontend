@@ -5,10 +5,10 @@ import {Dispatch, SetStateAction} from "react";
 import {DashboardData} from "../../types/common";
 
 type SidebarProps = {
-  tab: string
-  setTab: Dispatch<SetStateAction<string | Tab>>
-  data: DashboardData  | null
-  logout: (action: () => Promise<unknown>, success: string) => Promise<boolean>
+  tab?: string
+  setTab?: Dispatch<SetStateAction<string | Tab>>
+  data?: DashboardData  | null
+  logout?: (action: () => Promise<unknown>, success: string) => Promise<boolean>
 }
 
 
@@ -46,7 +46,7 @@ export const Sidebar = ({tab, setTab, data, logout}: SidebarProps) => {
       <div className="brand"><span className="brand-mark"><Radio size={20}/></span>Auto Order</div>
       <p className="nav-label">WORKSPACE</p>
       <nav>{navigation.map((n: any) => <button key={n.id} className={tab === n.id ? 'nav-item active' : 'nav-item'}
-                                        onClick={() => setTab(n.id)}>
+                                        onClick={() => setTab ? setTab(n.id) : null}>
         <n.icon size={18}/>
         {n.label}{n.id === 'orders' && <span className="nav-count">{data?.metrics.orders}</span>}</button>)}</nav>
       <div className="sidebar-bottom">
@@ -54,7 +54,7 @@ export const Sidebar = ({tab, setTab, data, logout}: SidebarProps) => {
           className="dot"/><strong>{data?.config.demo ? 'Demo workspace' : 'Live workspace'}</strong>
           <p>{data?.config.demo ? 'Try the flow before connecting providers.' : 'Check stream health while selling.'}</p>
         </div>
-        <button className="nav-item" onClick={() => void logout(() => api('auth/logout', {}), 'Signed out.')}>
+        <button className="nav-item" onClick={() => logout ? void logout(() => api('auth/logout', {}), 'Signed out.') : null}>
           <LogOut size={18}/>
             Sign out
         </button>

@@ -178,9 +178,9 @@ export default function Dashboard() {
   if (!data) return <Loading text={"Loading order"}/>
 
 
-  return <div className="app-shell">
-    <Sidebar data={data} logout={mutate} tab={tab} setTab={setTab}/>
-    <div className="main-area">
+  return <div className="app-shell-1">
+    {/*<Sidebar data={data} logout={mutate} tab={tab} setTab={setTab}/>*/}
+    <div className="main-area-1">
       <header className="topbar"><span>Workspace <span
         className="muted"> / </span> {navigation.find(n => n.id === tab)?.label}</span>
         <div className="topbar-right"><span className="small muted">Updates every 5 seconds</span>
@@ -228,7 +228,7 @@ export default function Dashboard() {
                                            mutate={mutate} setSelectedSession={setSelectedSession}
                                            setReviewing={setReviewing}/>}
         {tab === 'orders' &&
-            <TabOrders query={query} setQuery={setQuery} filter={filter} setFilter={setFilter} orders={orders} allOrders={data.orders}
+            <TabOrders query={query} setQuery={setQuery} filter={filter} setFilter={setFilter} orders={orders}
                        busy={busy} mutate={mutate} copyLink={copyLink}/>}
 
         {tab === 'products' && <Products data={data} editProduct={setEditing}/>}

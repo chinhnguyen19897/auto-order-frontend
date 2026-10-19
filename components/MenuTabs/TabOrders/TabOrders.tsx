@@ -1,9 +1,8 @@
 import React, {Dispatch, SetStateAction, useState} from 'react';
 import {tableFeatures, useTable} from '@tanstack/react-table'
 import type {ColumnDef} from '@tanstack/react-table'
-import {api} from "../../../lib/api";
 import {Badge} from "../../Badge/Badge";
-import {ArrowUpRight, Copy, ShoppingBag} from "lucide-react";
+import {ArrowUpRight, ShoppingBag} from "lucide-react";
 import {money} from "../../../utils/currency";
 import {Order} from "../../../types/common";
 import {checkLabels, matchesOrderFilter, workflowOptions, issueOptions} from '../../../lib/order-checks';
@@ -16,16 +15,15 @@ type TabOrdersProps = {
   filter: string,
   setFilter: Dispatch<SetStateAction<string>>,
   orders: Array<Order>,
-  allOrders: Array<Order>,
   busy: boolean,
   mutate: (action: () => Promise<unknown>, success: string) => Promise<any>,
   copyLink: (value: string) => void
 }
 
 
-const TabOrders = ({query, setQuery, filter, setFilter, orders, allOrders, busy, mutate, copyLink}: TabOrdersProps) => {
+const TabOrders = ({query, setQuery, filter, setFilter, orders, busy, mutate}: TabOrdersProps) => {
   const [checkingId, setCheckingId] = useState<string | null>(null);
-  const checking = allOrders.find(order => order.id === checkingId);
+  const checking = orders.find(order => order.id === checkingId);
 
   const features = tableFeatures({})
 
@@ -213,7 +211,7 @@ const TabOrders = ({query, setQuery, filter, setFilter, orders, allOrders, busy,
                                                                            aria-pressed={filter === value}
                                                                            className={filter === value ? 'active' : ''}
                                                                            onClick={() => setFilter(value)}>{checkLabels[value]}
-          <span>{allOrders.filter(order => matchesOrderFilter(order, value)).length}</span></button>)}
+          <span>{orders.filter(order => matchesOrderFilter(order, value)).length}</span></button>)}
       </div>
       {checking && <OrderChecks key={checking.id} order={checking} busy={busy} mutate={mutate}
                                 close={() => setCheckingId(null)}/>}
