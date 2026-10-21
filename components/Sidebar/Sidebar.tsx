@@ -1,15 +1,8 @@
-import {LogOut, Package, Radio, Send, Settings, ShoppingBag} from "lucide-react";
+import {LogOut, MessageSquareMore, Package, Radio, Send, Settings, ShoppingBag} from "lucide-react";
 import {api} from "../../lib/api";
-import {Tab} from "../../types/tabs";
-import {Dispatch, SetStateAction} from "react";
-import {DashboardData} from "../../types/common";
+import {useSidebarStore} from "../../providers/sidebar-store-provider";
+import {useEffect} from "react";
 
-type SidebarProps = {
-  tab?: string
-  setTab?: Dispatch<SetStateAction<string | Tab>>
-  data?: DashboardData  | null
-  logout?: (action: () => Promise<unknown>, success: string) => Promise<boolean>
-}
 
 
 export const navigation = [
@@ -17,6 +10,11 @@ export const navigation = [
     id: 'live',
     label: 'Live workspace',
     icon: Radio
+  },
+  {
+    id: 'zlMatching',
+    label: 'Zalo Matching',
+    icon: MessageSquareMore
   },
   {
     id: 'orders',
@@ -39,14 +37,16 @@ export const navigation = [
     icon: Settings
   }];
 
-export const Sidebar = ({tab, setTab, data, logout}: SidebarProps) => {
+export const Sidebar = () => {
+
+  const {tabs, setTabs, logoutPage, data} = useSidebarStore((state) => state)
 
   return (
     <aside className="sidebar">
       <div className="brand"><span className="brand-mark"><Radio size={20}/></span>Auto Order</div>
       <p className="nav-label">WORKSPACE</p>
-      <nav>{navigation.map((n: any) => <button key={n.id} className={tab === n.id ? 'nav-item active' : 'nav-item'}
-                                        onClick={() => setTab ? setTab(n.id) : null}>
+      <nav>{navigation.map((n: any) => <button key={n.id} className={tabs === n.id ? 'nav-item active' : 'nav-item'}
+                                        onClick={() => setTabs(n.id)}>
         <n.icon size={18}/>
         {n.label}{n.id === 'orders' && <span className="nav-count">{data?.metrics.orders}</span>}</button>)}</nav>
       <div className="sidebar-bottom">
@@ -54,7 +54,7 @@ export const Sidebar = ({tab, setTab, data, logout}: SidebarProps) => {
           className="dot"/><strong>{data?.config.demo ? 'Demo workspace' : 'Live workspace'}</strong>
           <p>{data?.config.demo ? 'Try the flow before connecting providers.' : 'Check stream health while selling.'}</p>
         </div>
-        <button className="nav-item" onClick={() => logout ? void logout(() => api('auth/logout', {}), 'Signed out.') : null}>
+        <button className="nav-item" onClick={() => logoutPage ? void logoutPage(() => api('auth/logout', {}), 'Signed out.') : null}>
           <LogOut size={18}/>
             Sign out
         </button>

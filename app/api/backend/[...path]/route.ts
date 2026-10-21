@@ -25,7 +25,7 @@ async function proxy(req: NextRequest, context: { params: Promise<{ path: string
     });
     const outputHeaders = new Headers({
       'Content-Type': 'application/json',
-      'Cache-Control': 'no-store',
+      'Cache-Control': 'no-stores',
       'Referrer-Policy': 'no-referrer'
     });
     for (const cookie of response.headers.getSetCookie()) outputHeaders.append('Set-Cookie', cookie);

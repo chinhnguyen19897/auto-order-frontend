@@ -23,10 +23,14 @@ import Notifications from "../Notifications/Notifications";
 import Settings from "../Settings/Settings";
 import {money} from "../../utils/currency";
 import {DashboardData, Product, Comment} from "../../types/common";
+import {useSidebarStore} from "../../providers/sidebar-store-provider";
 
 
 export default function Dashboard() {
-  const [data, setData] = useState<DashboardData | null>(null)
+  const {setData, data} = useSidebarStore((state) => state)
+
+
+  // const [data, setData] = useState<DashboardData | null>(null)
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [tab, setTab] = useState<Tab | string>('live')
   const [error, setError] = useState('')
