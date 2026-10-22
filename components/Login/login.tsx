@@ -30,7 +30,7 @@ const Login = () => {
     if (state.success) {
       router.replace("/dashboard");
     }
-  }, [state.success, router]);
+  }, [state.success]);
 
 
 

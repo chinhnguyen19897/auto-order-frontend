@@ -1,8 +1,9 @@
 import {createStore} from "zustand/vanilla";
 import {DashboardData} from "../types/common";
+import {Tab} from "../types/tabs";
 
 export type SidebarState = {
-  tabs: string,
+  tabs: string | Tab,
   isAuthenticated: boolean
   data: DashboardData | null
 }

@@ -10,10 +10,7 @@ import {
   MessageSquare
 } from 'lucide-react';
 import {api, ApiError} from '../../lib/api';
-import {navigation, Sidebar} from "../Sidebar/Sidebar";
 import {ModalCommon} from "../Modal/ModalCommon";
-import {Tab} from "../../types/tabs";
-import Login from "../Login/login";
 import Loading from "../Loading/Loading";
 import TabOrders from "../MenuTabs/TabOrders/TabOrders";
 import {matchesOrderFilter} from '../../lib/order-checks';
@@ -24,15 +21,16 @@ import Settings from "../Settings/Settings";
 import {money} from "../../utils/currency";
 import {DashboardData, Product, Comment} from "../../types/common";
 import {useSidebarStore} from "../../providers/sidebar-store-provider";
+import { navConfig } from "../../lib/navigation";
 
 
 export default function Dashboard() {
-  const {setData, data} = useSidebarStore((state) => state)
+  const {setData, data, tabs} = useSidebarStore((state) => state)
 
 
   // const [data, setData] = useState<DashboardData | null>(null)
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
-  const [tab, setTab] = useState<Tab | string>('live')
+  // const [tab, setTab] = useState<Tab | string>('live')
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [busy, setBusy] = useState(false);
@@ -186,7 +184,7 @@ export default function Dashboard() {
     {/*<Sidebar data={data} logout={mutate} tab={tab} setTab={setTab}/>*/}
     <div className="main-area-1">
       <header className="topbar"><span>Workspace <span
-        className="muted"> / </span> {navigation.find(n => n.id === tab)?.label}</span>
+        className="muted"> / </span> {navConfig.find(n => n.id === tabs)?.label}</span>
         <div className="topbar-right"><span className="small muted">Updates every 5 seconds</span>
           <button className="icon-button" aria-label="Refresh dashboard" onClick={() => void refresh()}><RefreshCw
             size={17}/></button>
@@ -195,13 +193,13 @@ export default function Dashboard() {
       <main className="content">
         <div className="page-title">
           <div><span className="eyebrow">LIVE COMMERCE, SIMPLIFIED</span>
-            <h1>{tab === 'live' ? 'Your live workspace' : navigation.find(n => n.id === tab)?.label}</h1>
+            <h1>{tabs === 'live' ? 'Your live workspace' : navConfig.find(n => n.id === tabs)?.label}</h1>
             <p
-              className="muted">{tab === 'live' ? 'Stay close to the conversation. We’ll keep track of the orders.' : 'Every detail you need, in one place.'}</p>
+              className="muted">{tabs === 'live' ? 'Stay close to the conversation. We’ll keep track of the orders.' : 'Every detail you need, in one place.'}</p>
           </div>
-          {tab === 'live' &&
+          {tabs === 'live' &&
               <button className="primary" onClick={() => setNewSession(true)}><Plus size={17}/>New session</button>}
-          {tab === 'products' &&
+          {tabs === 'products' &&
               <button className="primary" onClick={() => setEditing('new')}><Plus size={17}/>Add product</button>}
         </div>
         {error && <div className="alert error" role="alert">
@@ -225,21 +223,21 @@ export default function Dashboard() {
             )
           }
         </div>
-        {tab === 'live' && <TabSessionLive activeSession={activeSession} busy={busy} data={data} buyerId={buyerId}
+        {tabs === 'live' && <TabSessionLive activeSession={activeSession} busy={busy} data={data} buyerId={buyerId}
                                            setBuyerId={setBuyerId} setBuyerHandle={setBuyerHandle}
                                            buyerHandle={buyerHandle} commentText={commentText}
                                            setCommentText={setCommentText} comments={comments} simulate={simulate}
                                            mutate={mutate} setSelectedSession={setSelectedSession}
                                            setReviewing={setReviewing}/>}
-        {tab === 'orders' &&
+        {tabs === 'orders' &&
             <TabOrders query={query} setQuery={setQuery} filter={filter} setFilter={setFilter} orders={orders}
                        busy={busy} mutate={mutate} copyLink={copyLink}/>}
 
-        {tab === 'products' && <Products data={data} editProduct={setEditing}/>}
+        {tabs === 'products' && <Products data={data} editProduct={setEditing}/>}
 
-        {tab === 'notifications' && <Notifications data={data}/>}
+        {tabs === 'notifications' && <Notifications data={data}/>}
 
-        {tab === 'settings' && <Settings data={data}/>}
+        {tabs === 'settings' && <Settings data={data}/>}
       </main>
     </div>
     {editing &&

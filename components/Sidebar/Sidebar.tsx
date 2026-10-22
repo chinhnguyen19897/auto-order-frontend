@@ -1,41 +1,10 @@
-import {LogOut, MessageSquareMore, Package, Radio, Send, Settings, ShoppingBag} from "lucide-react";
+import {LogOut, Radio} from "lucide-react";
 import {api} from "../../lib/api";
 import {useSidebarStore} from "../../providers/sidebar-store-provider";
-import {useEffect} from "react";
+import {navConfig} from "../../lib/navigation";
 
 
 
-export const navigation = [
-  {
-    id: 'live',
-    label: 'Live workspace',
-    icon: Radio
-  },
-  {
-    id: 'zlMatching',
-    label: 'Zalo Matching',
-    icon: MessageSquareMore
-  },
-  {
-    id: 'orders',
-    label: 'Orders',
-    icon: ShoppingBag
-  },
-  {
-    id: 'products',
-    label: 'Products',
-    icon: Package
-  },
-  {
-    id: 'notifications',
-    label: 'Notifications',
-    icon: Send
-  },
-  {
-    id: 'settings',
-    label: 'Integrations',
-    icon: Settings
-  }];
 
 export const Sidebar = () => {
 
@@ -45,7 +14,7 @@ export const Sidebar = () => {
     <aside className="sidebar">
       <div className="brand"><span className="brand-mark"><Radio size={20}/></span>Auto Order</div>
       <p className="nav-label">WORKSPACE</p>
-      <nav>{navigation.map((n: any) => <button key={n.id} className={tabs === n.id ? 'nav-item active' : 'nav-item'}
+      <nav>{navConfig.map((n: any) => <button key={n.id} className={tabs === n.id ? 'nav-item active' : 'nav-item'}
                                         onClick={() => setTabs(n.id)}>
         <n.icon size={18}/>
         {n.label}{n.id === 'orders' && <span className="nav-count">{data?.metrics.orders}</span>}</button>)}</nav>
