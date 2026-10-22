@@ -3,9 +3,9 @@
   "version": "0.2.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3001",
     "build": "next build --webpack",
-    "start": "next start",
+    "start": "next start -p 3001",
     "typecheck": "tsc --noEmit",
     "setup": "node scripts/setup.mjs"
   },

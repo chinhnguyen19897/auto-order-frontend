@@ -1,17 +1,39 @@
-import React, {Dispatch, SetStateAction, SyntheticEvent} from 'react';
+'use client'
+
+import React, {useActionState, useEffect, useState} from 'react';
 import {ArrowUpRight, Radio} from "lucide-react";
+import {useRouter} from "next/navigation";
+import {initialLoginState, loginActions} from "../../lib/auth";
 
-type LoginProps = {
-  error: string,
-  busy: boolean,
-  email: string,
-  setEmail: Dispatch<SetStateAction<string>>,
-  login: (e: SyntheticEvent) => Promise<void>,
-  password: string,
-  setPassword: Dispatch<SetStateAction<string>>
-}
 
-const Login = ({error, busy, email, login, setEmail, password, setPassword}: LoginProps) => {
+const Login = () => {
+  const router = useRouter();
+
+
+  const [dataLogin, setDataLogin] = useState({
+    email: "",
+    password: "",
+  })
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
+      setDataLogin((prevState) => ({
+        ...prevState,
+        [field]: e.target.value,
+      }))
+  }
+
+
+  const [state, formAction, isPending] = useActionState(loginActions, initialLoginState)
+
+
+  useEffect(() => {
+    if (state.success) {
+      router.replace("/dashboard");
+    }
+  }, [state.success, router]);
+
+
+
   return (
     <main className="login">
       <div className="login-intro">
@@ -30,17 +52,17 @@ const Login = ({error, busy, email, login, setEmail, password, setPassword}: Log
           <span className="dot"/> Built for live commerce
         </div>
       </div>
-      <form className="login-card" onSubmit={login}>
+      <form className="login-card" action={formAction}>
         <span className="eyebrow">SELLER WORKSPACE</span>
         <h2>Welcome back</h2>
         <p className="muted">Sign in to manage your next drop.</p>
-        <label>Email<input type="email" autoComplete="username" required value={email}
-                           onChange={e => setEmail(e.target.value)}/></label>
-        <label>Password<input type="password" autoComplete="current-password" required value={password}
-                              onChange={e => setPassword(e.target.value)}/></label>
-        {error && <p className="error" role="alert">{error}</p>}
-        <button disabled={busy} className="primary">
-          {busy ? 'Signing in…' : 'Sign in'} <ArrowUpRight size={17}/>
+        <label>Email<input type="email" name="email" autoComplete="username" required value={dataLogin.email}
+                           onChange={e => handleInputChange(e, "email")}/></label>
+        <label>Password<input type="password" name="password" autoComplete="current-password" required value={dataLogin.password}
+                              onChange={e => handleInputChange(e, "password")}/></label>
+        {state.error && <p className="error" role="alert">{state.error}</p>}
+        <button disabled={isPending} className="primary" type="submit">
+          {isPending ? 'Signing in…' : 'Sign in'} <ArrowUpRight size={17}/>
         </button>
         <p className="small muted">First run? Use the credentials generated in <code>backend/.env</code>.</p>
       </form>

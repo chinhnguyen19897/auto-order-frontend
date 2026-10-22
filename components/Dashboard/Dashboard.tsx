@@ -112,11 +112,11 @@ export default function Dashboard() {
   ]
 
 
-  async function login(e: SyntheticEvent) {
+  /*async function signin(e: SyntheticEvent) {
     e.preventDefault();
-    await mutate(() => api('auth/login', {email, password}), 'Signed in.');
+    await mutate(() => api('auth/(auth)', {email, password}), 'Signed in.');
     setPassword('');
-  }
+  }*/
 
   async function simulate(e: SyntheticEvent) {
     e.preventDefault();
@@ -176,8 +176,8 @@ export default function Dashboard() {
 
   if (signedIn === null) return <Loading text={"Connecting to Auto Order…"} error={error}/>
 
-  if (!signedIn) return <Login login={login} busy={busy} email={email} setEmail={setEmail} error={error}
-                               password={password} setPassword={setPassword}/>
+  /*if (!signedIn) return <Login signin={signin} busy={busy} email={email} setEmail={setEmail} error={error}
+                               password={password} setPassword={setPassword}/>*/
 
   if (!data) return <Loading text={"Loading order"}/>
 
