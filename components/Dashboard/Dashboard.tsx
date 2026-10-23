@@ -22,20 +22,17 @@ import {money} from "../../utils/currency";
 import {DashboardData, Product, Comment} from "../../types/common";
 import {useSidebarStore} from "../../providers/sidebar-store-provider";
 import { navConfig } from "../../lib/navigation";
+import {useRouter} from "next/navigation";
 
 
 export default function Dashboard() {
-  const {setData, data, tabs} = useSidebarStore((state) => state)
+  const {setData, data, tabs, isAuthenticated} = useSidebarStore((state) => state)
+  const router = useRouter()
 
-
-  // const [data, setData] = useState<DashboardData | null>(null)
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
-  // const [tab, setTab] = useState<Tab | string>('live')
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [busy, setBusy] = useState(false);
-  const [email, setEmail] = useState('admin@example.com')
-  const [password, setPassword] = useState('');
   const [selectedSession, setSelectedSession] = useState('')
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState('ALL');
@@ -64,6 +61,13 @@ export default function Dashboard() {
     const timer = setInterval(() => void refresh(), 5000);
     return () => clearInterval(timer);
   }, [refresh]);
+
+  useEffect(() => {
+    if(!isAuthenticated) {
+      router.replace("/signin");
+      router.refresh()
+    }
+  }, [isAuthenticated]);
 
   const mutate = async (action: () => Promise<unknown>, success: string) => {
     setBusy(true);
@@ -110,11 +114,6 @@ export default function Dashboard() {
   ]
 
 
-  /*async function signin(e: SyntheticEvent) {
-    e.preventDefault();
-    await mutate(() => api('auth/(auth)', {email, password}), 'Signed in.');
-    setPassword('');
-  }*/
 
   async function simulate(e: SyntheticEvent) {
     e.preventDefault();
@@ -174,14 +173,10 @@ export default function Dashboard() {
 
   if (signedIn === null) return <Loading text={"Connecting to Auto Order…"} error={error}/>
 
-  /*if (!signedIn) return <Login signin={signin} busy={busy} email={email} setEmail={setEmail} error={error}
-                               password={password} setPassword={setPassword}/>*/
-
   if (!data) return <Loading text={"Loading order"}/>
 
 
   return <div className="app-shell-1">
-    {/*<Sidebar data={data} logout={mutate} tab={tab} setTab={setTab}/>*/}
     <div className="main-area-1">
       <header className="topbar"><span>Workspace <span
         className="muted"> / </span> {navConfig.find(n => n.id === tabs)?.label}</span>

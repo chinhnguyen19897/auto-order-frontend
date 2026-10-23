@@ -29,6 +29,7 @@ const Login = () => {
   useEffect(() => {
     if (state.success) {
       router.replace("/dashboard");
+      router.refresh()
     }
   }, [state.success]);
 
